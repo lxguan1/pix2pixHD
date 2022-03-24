@@ -20,6 +20,9 @@ class TrainOptions(BaseOptions):
         self.parser.add_argument('--niter_decay', type=int, default=100, help='# of iter to linearly decay learning rate to zero')
         self.parser.add_argument('--beta1', type=float, default=0.5, help='momentum term of adam')
         self.parser.add_argument('--lr', type=float, default=0.0002, help='initial learning rate for adam')
+        self.parser.add_argument("--start_epoch", type=int, default = 0, help = "which epoch to start at")
+        self.parser.add_argument("--gan_loss_numpy", type=str, default = None, help = "which numpy file to save gan loss")
+        self.parser.add_argument("--disc_loss_numpy", type=str, default = None, help = "which numpy file to save disc loss")
 
         # for discriminators        
         self.parser.add_argument('--num_D', type=int, default=2, help='number of discriminators to use')

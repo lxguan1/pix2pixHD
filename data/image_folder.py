@@ -9,8 +9,7 @@ from PIL import Image
 import os
 
 IMG_EXTENSIONS = [
-    '.jpg', '.JPG', '.jpeg', '.JPEG',
-    '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP', '.tiff'
+    '.npy', '.npz'
 ]
 
 
@@ -31,8 +30,8 @@ def make_dataset(dir):
     return images
 
 
-def default_loader(path):
-    return Image.open(path).convert('RGB')
+def default_loader(path): #Loads the image, then adds a new axis
+    return [np.load(path), np.newaxis] #Image.open(path).convert('RGB')
 
 
 class ImageFolder(data.Dataset):
@@ -49,7 +48,7 @@ class ImageFolder(data.Dataset):
         self.imgs = imgs
         self.transform = transform
         self.return_paths = return_paths
-        self.loader = loader
+        self.loader = default_loader #modified from loader
 
     def __getitem__(self, index):
         path = self.imgs[index]

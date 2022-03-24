@@ -2,6 +2,8 @@ import numpy as np
 import os
 import ntpath
 import time
+import matplotlib.pyplot as plt
+import colorcet as cc
 from . import util
 from . import html
 import scipy.misc
@@ -58,10 +60,18 @@ class Visualizer():
                 if isinstance(image_numpy, list):
                     for i in range(len(image_numpy)):
                         img_path = os.path.join(self.img_dir, 'epoch%.3d_%s_%d.jpg' % (epoch, label, i))
-                        util.save_image(image_numpy[i], img_path)
+                        #util.save_image(image_numpy[i], img_path)
+                        im_map = plt.imshow(image_numpy[i], cmap=cc.cm.CET_D2, vmin = 45, vmax = 230)
+                        plt.colorbar(im_map)
+                        plt.savefig(img_path)
+                        plt.gca().images[-1].colorbar.remove()
                 else:
                     img_path = os.path.join(self.img_dir, 'epoch%.3d_%s.jpg' % (epoch, label))
-                    util.save_image(image_numpy, img_path)
+                    #util.save_image(image_numpy, img_path)
+                    im_map = plt.imshow(image_numpy, cmap=cc.cm.CET_D2, vmin = 45, vmax = 230)
+                    plt.colorbar(im_map)
+                    plt.savefig(img_path)
+                    plt.gca().images[-1].colorbar.remove()
 
             # update website
             webpage = html.HTML(self.web_dir, 'Experiment name = %s' % self.name, refresh=30)
@@ -123,7 +133,24 @@ class Visualizer():
         for label, image_numpy in visuals.items():
             image_name = '%s_%s.jpg' % (name, label)
             save_path = os.path.join(image_dir, image_name)
-            util.save_image(image_numpy, save_path)
+            colormapping =  cc.cm.CET_D1A  #for middles and right image
+            #Vmin = 45
+            #Vmax = 230 #for left 3 images 
+            #image_numpy = image_numpy * np.load("normalize_constantA.npy") * 2 / 255 - 1 
+
+            if label[0] == 'i': #for input image
+                colormapping = cc.cm.CET_D2 #for left image
+                #plt.imshow(image_numpy, cmap=cc.cm.CET_D1A) #util.save_image(image_numpy, save_path)
+
+            if label[5] == '-': #for difference image
+                Vmin = -55
+                Vmax = 130
+
+            im_map = plt.imshow(image_numpy, cmap=colormapping )# , vmin = Vmin, vmax = Vmax) #util.save_image(image_numpy, save_path)
+            #plt.colorbar(im_map)
+            plt.colorbar(extend='max')
+            plt.savefig(save_path)
+            plt.gca().images[-1].colorbar.remove()
 
             ims.append(image_name)
             txts.append(label)

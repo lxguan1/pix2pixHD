@@ -15,12 +15,15 @@ def tensor2im(image_tensor, imtype=np.uint8, normalize=True):
         return image_numpy
     image_numpy = image_tensor.cpu().float().numpy()
     if normalize:
+        #image_numpy = np.transpose(image_numpy, (1,2,0) )
         image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
     else:
         image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0      
     image_numpy = np.clip(image_numpy, 0, 255)
     if image_numpy.shape[2] == 1 or image_numpy.shape[2] > 3:        
         image_numpy = image_numpy[:,:,0]
+    
+    #print(f"{image_numpy.shape} this is in util")
     return image_numpy.astype(imtype)
 
 # Converts a one-hot tensor into a colorful label map

@@ -3,6 +3,7 @@ from PIL import Image
 import torchvision.transforms as transforms
 import numpy as np
 import random
+from scipy import interpolate
 
 class BaseDataset(data.Dataset):
     def __init__(self):
@@ -30,7 +31,7 @@ def get_params(opt, size):
     flip = random.random() > 0.5
     return {'crop_pos': (x, y), 'flip': flip}
 
-def get_transform(opt, params, method=Image.BICUBIC, normalize=True):
+def get_transform(opt, params, method=Image.BICUBIC, normalize=True, norm_val = 0.5):
     transform_list = []
     if 'resize' in opt.resize_or_crop:
         osize = [opt.loadSize, opt.loadSize]
@@ -53,38 +54,60 @@ def get_transform(opt, params, method=Image.BICUBIC, normalize=True):
     transform_list += [transforms.ToTensor()]
 
     if normalize:
-        transform_list += [transforms.Normalize((0.5, 0.5, 0.5),
-                                                (0.5, 0.5, 0.5))]
+        transform_list += [transforms.Lambda(lambda img: normalize_img(img, norm_val))] #[transforms.Normalize((0.5), #
+            #                                    (0.5))]
     return transforms.Compose(transform_list)
 
-def normalize():    
-    return transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+def normalize(): #return a new transform that normalizes the img   
+    return transforms.Normalize((0.5), (0.5))
+
+def normalize_img(img, norm_val): #Need to determine which normalization factor
+    return img / norm_val
 
 def __make_power_2(img, base, method=Image.BICUBIC):
-    ow, oh = img.size        
+    #TODO: Modify for numpy array
+    #print('one', flush = True)
+    ow = img.shape[1] 
+    oh = img.shape[0] 
+    range_x = np.linspace(0, ow, ow)
+    range_y = np.linspace(0, oh, oh)
+    range_x_mesh, range_y_mesh = np.meshgrid(range_x, range_y)
     h = int(round(oh / base) * base)
     w = int(round(ow / base) * base)
     if (h == oh) and (w == ow):
         return img
-    return img.resize((w, h), method)
+    f = interpolate.interp2d(range_x_mesh, range_y_mesh, img[:,:,0], kind='cubic')
+    print('dataset_make_power_2____________________________________________________________________________________', flush = True)
+    return f(w, h)[:,:,np.newaxis] #np.repeat(f(w, h)[:,:,np.newaxis], 3, axis=2) #img.resize((w, h), method)
 
 def __scale_width(img, target_width, method=Image.BICUBIC):
-    ow, oh = img.size
+    #TODO: Modify for numpy array (interpolation may fix this)
+    ow = img.shape[1]
+    oh = img.shape[0]
+    #print('one', flush = True)
+    range_x = np.linspace(0, ow, ow)
+    range_y = np.linspace(0, oh, oh)
+    range_x_mesh, range_y_mesh = np.meshgrid(range_x, range_y)
     if (ow == target_width):
         return img    
     w = target_width
-    h = int(target_width * oh / ow)    
-    return img.resize((w, h), method)
+    h = int(target_width * oh / ow) 
+    f = interpolate.interp2d(range_x_mesh, range_y_mesh, img[:,:,0], kind='cubic')
+    print('one scale_width', flush=True)
+    return f(np.arange(w), np.arange(h))[:,:,np.newaxis] #np.repeat(f(w, h)[:,:,np.newaxis], 3, axis=2) #img.resize((w, h), method)
 
 def __crop(img, pos, size):
-    ow, oh = img.size
+    #print(type(img)) #################################################### Debug
+    ow= img.shape[1] 
+    oh = img.shape[0]
     x1, y1 = pos
     tw = th = size
+    #print("crop________________________________________________________________________________________________________", flush = True)
     if (ow > tw or oh > th):        
-        return img.crop((x1, y1, x1 + tw, y1 + th))
+        return img[y1: y1 + th, x1:x1 + tw]
     return img
 
 def __flip(img, flip):
     if flip:
-        return img.transpose(Image.FLIP_LEFT_RIGHT)
+        return np.fliplr(img).copy() #img.transpose(Image.FLIP_LEFT_RIGHT)
     return img
