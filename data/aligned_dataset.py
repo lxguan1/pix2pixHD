@@ -19,25 +19,11 @@ class AlignedDataset(BaseDataset):
             img_arr = np.load(img)
             val = np.max(np.abs(img_arr[img_arr.files[0]]))
             self.norm_A = max(self.norm_A, val)
-        #print('Path:', self.A_paths[0])
-        #raise Exception(self.A_paths[0])
-        ### input B (real images)
-        if True: #opt.isTrain or opt.use_encoded_image: #True: #Get real images
+
+        if True: #Get real images
             dir_B = '_B' if self.opt.label_nc == 0 else '_img'
             self.dir_B = os.path.join(opt.dataroot, opt.phase + dir_B)  
             self.B_paths = sorted(make_dataset(self.dir_B))
-
-            #self.norm_B = 0
-            #for img in self.B_paths:
-            #    img_arr = np.load(img)
-            #    val = np.max(np.abs(img_arr[img_arr.files[0]]))
-            #    #print('val:', val) ###
-            #    self.norm_B = max(self.norm_B, val)
-            #    print(img)
-        #print(self.B_paths[0])
-        #raise Exception(self.B_paths[0])
-        #print('self.norm_A:', self.norm_A)
-        #print('self.norm_B:', self.norm_B)
         
 
 
@@ -58,8 +44,7 @@ class AlignedDataset(BaseDataset):
         ### input A (label maps)
         A_path = self.A_paths[index]              
         A = np.load(A_path) #Image.open(A_path)
-        A = A[A.files[0]][:, :, np.newaxis] #np.repeat(A[A.files[0]][256:512,0:256, np.newaxis], 3, axis=2) #To extract the array from the .npz
-        #A = A / self.norm_A
+        A = A[A.files[0]][:, :, np.newaxis] #To extract the array
         params = get_params(self.opt, (A.shape[1], A.shape[0]))
         if self.opt.label_nc == 0: #This branch will execute.
             transform_A = get_transform(self.opt, params)
@@ -70,19 +55,16 @@ class AlignedDataset(BaseDataset):
 
         B_tensor = inst_tensor = feat_tensor = 0
         ### input B (real images)
-        if True: #self.opt.isTrain or self.opt.use_encoded_image: #True: #Always have real images
+        if True: #Always have real images
             B_path = self.B_paths[index]   
-            B = np.load(B_path) #Image.open(B_path).convert('RGB')
-            B = B[B.files[0]][:, :, np.newaxis] * 20 #np.repeat(B[B.files[0]][256:512,0:256, np.newaxis] * 20, 3, axis=2) #To extract the array from the .npz
-            #B = B / self.norm_B
+            B = np.load(B_path) 
+            B = B[B.files[0]][:, :, np.newaxis] * 20 #To extract the array
             transform_B = get_transform(self.opt, params, normalize=True, norm_val = self.norm_A)      
             B_tensor = transform_B(B)
-            #print('real images:', B_tensor)
-            #print('self.norm_A:', self.norm_A)
-            #print('self.norm_B:', self.norm_B)
+
 
         ### if using instance maps        
-        if not self.opt.no_instance:
+        if not self.opt.no_instance: #Not used
             inst_path = self.inst_paths[index]
             inst = Image.open(inst_path)
             inst_tensor = transform_A(inst)

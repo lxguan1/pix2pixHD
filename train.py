@@ -24,13 +24,9 @@ def output_correlation(visuals):
     have_real = False 
     curr_synth = np.array([])
     curr_real = np.array([])
-    #print("len(visuals.items()):", len(visuals.items()))
+
     for label, image_numpy in visuals.items():
-        #print(f"label is + {label}")
-        #curr_synth = np.array([])
-        #curr_real = np.array([])
-        #have_synth = False
-        #have_real = False
+
         if label[0] == 's': #this is a synthesized image
             curr_synth = image_numpy
             #print(f"This is the image_numpy shape: {image_numpy.shape} " )
@@ -61,6 +57,7 @@ def output_correlation(visuals):
 def main(cont_train):
     opt = TrainOptions().parse()
     iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
+    #Lets training continue if which_epoch != 1
     opt.continue_train = cont_train
     print("opt:", opt.continue_train, flush = True)
     if opt.continue_train:
@@ -103,37 +100,24 @@ def main(cont_train):
     display_delta = total_steps % opt.display_freq
     print_delta = total_steps % opt.print_freq
     save_delta = total_steps % opt.save_latest_freq
- #   print("Start epoch")
-    
-    
-    #for data in dataset:
-       # print("data el:", data)
 
-    for epoch in range(start_epoch, start_epoch + 1): #The epoch number inputted #opt.niter + opt.niter_decay + 1):
+
+    for epoch in range(start_epoch, start_epoch + 1): #The epoch number inputted 
         epoch_start_time = time.time()
         if epoch != start_epoch:
             epoch_iter = epoch_iter % dataset_size
-#        print("start dataset enumeration")
+
         start_loaddata = time.time()
         for i, data in enumerate(dataset, start=epoch_iter):
             if i == 0:
                 print("loaded:", time.time() - start_loaddata, flush=True)
-            #print("inside epoch enum data", flush=True)
-  #          print("RAM objects:",h.heap(),flush=True)
-            #print(h.heap().byid[0].sp, flush=True)
+
             if total_steps % opt.print_freq == print_delta:
                 iter_start_time = time.time()
             total_steps += opt.batchSize
             epoch_iter += opt.batchSize
 
-   #         print("img shape1:", data['image'].shape)
-    #        print("inst shape1:", data['inst'].shape)
-     #       print("feat shape1:", data['feat'].shape)
 
-            #print("Utilization outside forward", flush=True)
-            #print("CPU percentage:", psutil.cpu_percent())
-            #print("RAM utilization:", psutil.virtual_memory().percent)
-            #print("RAM value:", psutil.virtual_memory())
 
             # whether to collect output images
             save_fake = total_steps % opt.display_freq == display_delta
@@ -142,11 +126,7 @@ def main(cont_train):
             losses, generated = model(Variable(data['label']), Variable(data['inst']), 
                 Variable(data['image']), Variable(data['feat']), infer=save_fake)
 
-            #print("img shape2:", data['image'].shape)
-            #print("inst shape2:", data['inst'].shape)
-            #print("feat shape2:", data['feat'].shape)
-            #print("image:", np.unique(data['image']))
-            #print("unique values:", len(np.unique(data['image'])))
+
 
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
@@ -156,13 +136,7 @@ def main(cont_train):
             loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5
             loss_G = loss_dict['G_GAN'] + loss_dict.get('G_GAN_Feat',0) + loss_dict.get('G_VGG',0)
 
-            #print("Utilization inside forward")
-            #print("CPU percentage:", psutil.cpu_percent())
-            #print("RAM utilization:", psutil.virtual_memory().percent)
-            #print("RAM value:", psutil.virtual_memory())
 
- 
-           # print(torch.cuda.memory_summary()) #Memory allocated
             ############### Backward Pass ####################
             # update generator weights
             optimizer_G.zero_grad()
@@ -186,8 +160,7 @@ def main(cont_train):
                 errors = {k: v.data.item() if not isinstance(v, int) else v for k, v in loss_dict.items()}            
                 t = (time.time() - iter_start_time) / opt.print_freq
                 visualizer.print_current_errors(epoch, epoch_iter, errors, t)
-                visualizer.plot_current_errors(errors, total_steps)
-                #call(["nvidia-smi", "--format=csv", "--query-gpu=memory.used,memory.free"]) 
+                visualizer.plot_current_errors(errors, total_steps) 
 
             ### display output images
             if save_fake:
@@ -210,6 +183,7 @@ def main(cont_train):
         print('End of epoch %d / %d \t Time Taken: %d sec' %
               (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
 
+        #Get the GAN and Disc losses and store them
         if (opt.gan_loss_numpy != None and opt.disc_loss_numpy != None):
             file_all_gan_loss = np.load(opt.gan_loss_numpy)
             file_all_disc_loss = np.load(opt.disc_loss_numpy)
@@ -237,20 +211,8 @@ def main(cont_train):
 if __name__ == '__main__':
     
     opt = TrainOptions().parse()
-    if opt.start_epoch == 1: #Make a new model if epoch == 1
+    if opt.which_epoch == 1: #Make a new model if epoch == 1
         main(False)
     else:
         main(True)
-    #print(opt.continue_train)
-    #for i in range(200):
-    #    torch.cuda.empty_cache()
-    #    if (i == 0):
-    #        #opt.continue_train = False
-    #        #print(opt.continue_train)
-    #        main(False)
-    #    else:
-    #        #opt.continue_train = True
-    #        main(True)
-    #    print(i, "=========================================================================")
-    #    #main()
-    #    print("RAM objects:",h.heap(),flush=True)
+

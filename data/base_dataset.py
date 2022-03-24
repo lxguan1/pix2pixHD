@@ -65,7 +65,6 @@ def normalize_img(img, norm_val): #Need to determine which normalization factor
     return img / norm_val
 
 def __make_power_2(img, base, method=Image.BICUBIC):
-    #TODO: Modify for numpy array
     #print('one', flush = True)
     ow = img.shape[1] 
     oh = img.shape[0] 
@@ -77,11 +76,10 @@ def __make_power_2(img, base, method=Image.BICUBIC):
     if (h == oh) and (w == ow):
         return img
     f = interpolate.interp2d(range_x_mesh, range_y_mesh, img[:,:,0], kind='cubic')
-    print('dataset_make_power_2____________________________________________________________________________________', flush = True)
-    return f(w, h)[:,:,np.newaxis] #np.repeat(f(w, h)[:,:,np.newaxis], 3, axis=2) #img.resize((w, h), method)
+    
+    return f(w, h)[:,:,np.newaxis] 
 
-def __scale_width(img, target_width, method=Image.BICUBIC):
-    #TODO: Modify for numpy array (interpolation may fix this)
+def __scale_width(img, target_width, method=Image.BICUBIC): #NOT USED
     ow = img.shape[1]
     oh = img.shape[0]
     #print('one', flush = True)
@@ -94,20 +92,18 @@ def __scale_width(img, target_width, method=Image.BICUBIC):
     h = int(target_width * oh / ow) 
     f = interpolate.interp2d(range_x_mesh, range_y_mesh, img[:,:,0], kind='cubic')
     print('one scale_width', flush=True)
-    return f(np.arange(w), np.arange(h))[:,:,np.newaxis] #np.repeat(f(w, h)[:,:,np.newaxis], 3, axis=2) #img.resize((w, h), method)
+    return f(np.arange(w), np.arange(h))[:,:,np.newaxis]
 
-def __crop(img, pos, size):
-    #print(type(img)) #################################################### Debug
+def __crop(img, pos, size): #Used
     ow= img.shape[1] 
     oh = img.shape[0]
     x1, y1 = pos
     tw = th = size
-    #print("crop________________________________________________________________________________________________________", flush = True)
     if (ow > tw or oh > th):        
         return img[y1: y1 + th, x1:x1 + tw]
     return img
 
 def __flip(img, flip):
     if flip:
-        return np.fliplr(img).copy() #img.transpose(Image.FLIP_LEFT_RIGHT)
+        return np.fliplr(img).copy() 
     return img

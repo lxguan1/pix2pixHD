@@ -27,7 +27,7 @@
 # --continue_train starts from the latest epoch
 for i in {1..700}
 do
-    python3 train.py --name idealized_E2 --label_nc 0 --continue_train --no_instance  --dataroot ./datasets/E2 --no_vgg_loss  --resize_or_crop crop  --no_flip --start_epoch  $i --gan_loss_numpy all_gan_loss_2.npy --disc_loss_numpy all_disc_loss_2.npy
+    python3 train.py --name idealized_E2 --label_nc 0 --continue_train --no_instance  --dataroot ./datasets/E2 --no_vgg_loss  --resize_or_crop crop  --no_flip --which_epoch  $i --gan_loss_numpy all_gan_loss_2.npy --disc_loss_numpy all_disc_loss_2.npy
 #    python3 test.py --name idealized_E2 --resize_or_crop crop --no_instance --which_epoch $i  --label_nc 0 --how_many 300 --dataroot ./datasets/E2 --numpy_file_rmse E2_test_rmse.npy
 #    python3 test.py --name idealized_E2 --resize_or_crop crop --no_instance --which_epoch $i --label_nc 0 --how_many 240 --dataroot ./datasets/E2 --phase val --numpy_file_rmse E2_val_rmse.npy
 done
