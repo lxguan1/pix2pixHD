@@ -28,8 +28,10 @@ def get_params(opt, size):
     x = random.randint(0, np.maximum(0, new_w - opt.fineSize))
     y = random.randint(0, np.maximum(0, new_h - opt.fineSize))
     
-    flip = random.random() > 0.5
-    return {'crop_pos': (x, y), 'flip': flip}
+    fliplr = random.random() > 0.5
+    flipud = random.random() > 0.5
+    rotate = random.random() > 0.5
+    return {'crop_pos': (x, y), 'fliplr': fliplr, 'flipud': flipud, 'rotate': rotate}
 
 def get_transform(opt, params, method=Image.BICUBIC, normalize=True, norm_val = 0.5):
     transform_list = []
@@ -48,8 +50,14 @@ def get_transform(opt, params, method=Image.BICUBIC, normalize=True, norm_val = 
             base *= (2 ** opt.n_local_enhancers)
         transform_list.append(transforms.Lambda(lambda img: __make_power_2(img, base, method)))
 
-    if opt.isTrain and not opt.no_flip:
-        transform_list.append(transforms.Lambda(lambda img: __flip(img, params['flip'])))
+    if opt.isTrain and not opt.no_flip: #flip input image left-right
+        transform_list.append(transforms.Lambda(lambda img: __fliplr(img, params['fliplr'])))
+
+    if opt.isTrain and not opt.no_flip: #flip input image up-down
+        transform_list.append(transforms.Lambda(lambda img: __flipud(img, params['flipud'])))
+
+    if opt.isTrain: #Rotate input 90 degrees
+        transform_list.append(transforms.Lambda(lambda img: __rotate(img, params['rotate']))) 
 
     transform_list += [transforms.ToTensor()]
 
@@ -64,7 +72,7 @@ def normalize(): #return a new transform that normalizes the img
 def normalize_img(img, norm_val): #Need to determine which normalization factor
     return img / norm_val
 
-def __make_power_2(img, base, method=Image.BICUBIC):
+def __make_power_2(img, base, method=Image.BICUBIC): #NOT USED
     #print('one', flush = True)
     ow = img.shape[1] 
     oh = img.shape[0] 
@@ -76,8 +84,7 @@ def __make_power_2(img, base, method=Image.BICUBIC):
     if (h == oh) and (w == ow):
         return img
     f = interpolate.interp2d(range_x_mesh, range_y_mesh, img[:,:,0], kind='cubic')
-    
-    return f(w, h)[:,:,np.newaxis] 
+    return f(w, h)[:,:,np.newaxis]
 
 def __scale_width(img, target_width, method=Image.BICUBIC): #NOT USED
     ow = img.shape[1]
@@ -94,7 +101,7 @@ def __scale_width(img, target_width, method=Image.BICUBIC): #NOT USED
     print('one scale_width', flush=True)
     return f(np.arange(w), np.arange(h))[:,:,np.newaxis]
 
-def __crop(img, pos, size): #Used
+def __crop(img, pos, size): #Crops Image
     ow= img.shape[1] 
     oh = img.shape[0]
     x1, y1 = pos
@@ -103,7 +110,17 @@ def __crop(img, pos, size): #Used
         return img[y1: y1 + th, x1:x1 + tw]
     return img
 
-def __flip(img, flip):
+def __fliplr(img, flip): #Flips Images Left-Right
     if flip:
         return np.fliplr(img).copy() 
+    return img
+
+def __flipud(img, flip): #Flips Images Up-Down
+    if flip:
+        return np.flipud(img).copy()
+    return img
+
+def __rotate(img, rotate): #Rotates Images 90 degrees
+    if rotate:
+        return np.rot90(img).copy()
     return img
