@@ -86,7 +86,7 @@ if __name__ == '__main__':
             exit(1)
         #Update correlation and rmse
         corr_avg += corr
-        rms_avg += 1 - np.sqrt(((data_gen - data_im.detach().cpu().numpy()) ** 2).mean() / (data_im.detach().cpu().numpy() **2).mean())
+        rms_avg += np.sqrt(((data_gen - data_im.detach().cpu().numpy()) ** 2).mean() / (data_im.detach().cpu().numpy() **2).mean())
         all_val += 1
 
 
