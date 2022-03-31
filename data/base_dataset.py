@@ -84,7 +84,7 @@ def __make_power_2(img, base, method=Image.BICUBIC): #NOT USED
     if (h == oh) and (w == ow):
         return img
     f = interpolate.interp2d(range_x_mesh, range_y_mesh, img[:,:,0], kind='cubic')
-    return f(w, h)[:,:,np.newaxis]
+    return f(w, h)[:,:,np.newaxis] 
 
 def __scale_width(img, target_width, method=Image.BICUBIC): #NOT USED
     ow = img.shape[1]
