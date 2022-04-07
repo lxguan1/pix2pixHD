@@ -71,6 +71,9 @@ class Pix2PixHDModel(BaseModel):
             # define loss functions
             self.loss_filter = self.init_loss_filter(not opt.no_ganFeat_loss, not opt.no_vgg_loss)
             
+            self.path = opt.name #used in calculating losses
+            self.which_epoch = opt.which_epoch
+
             self.criterionGAN = networks.GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)   
             self.criterionFeat = torch.nn.L1Loss()
             if not opt.no_vgg_loss:             
@@ -173,6 +176,12 @@ class Pix2PixHDModel(BaseModel):
         # GAN loss (Fake Passability Loss)        
         pred_fake = self.netD.forward(torch.cat((input_label, fake_image), dim=1))        
         loss_G_GAN = self.criterionGAN(pred_fake, True)               
+
+        loss_GAN = networks.GANLoss(target_real_label=0.5, tensor=self.Tensor)
+        loss_numpy = np.load(self.path[-2:] + '_loss.npy')
+        loss_numpy[int(self.which_epoch)] += loss_GAN(pred_fake, True).item()
+        np.save(self.path[-2:] + '_loss.npy', loss_numpy)
+        #print('GAN Loss Stored to Numpy')
         
         # GAN feature matching loss
         loss_G_GAN_Feat = 0
