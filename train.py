@@ -110,9 +110,9 @@ def main(cont_train):
     print_delta = total_steps % opt.print_freq
     save_delta = total_steps % opt.save_latest_freq
 
-    loss_numpy = np.load(opt.name[-2:] + '_loss.npy') #generator loss
-    loss_numpy[int(opt.which_epoch)] = 0
-    np.save(opt.name[-2:] + '_loss.npy', loss_numpy)
+    #loss_numpy = np.load(opt.name[-2:] + '_loss.npy') #generator loss
+    #loss_numpy[int(opt.which_epoch)] = 0
+    #np.save(opt.name[-2:] + '_loss.npy', loss_numpy)
     for epoch in range(start_epoch, start_epoch + 1): #The epoch number inputted 
         epoch_start_time = time.time()
         if epoch != start_epoch:
@@ -213,9 +213,9 @@ def main(cont_train):
             np.save(opt.disc_loss_numpy, file_all_disc_loss)
             print("Saving Gan Loss", loss_dict["G_GAN"].item(), loss_D.item())
 
-        loss_numpy = np.load(opt.name[-2:] + '_loss.npy') #generator loss
-        loss_numpy[int(opt.which_epoch)] /= 960
-        np.save(opt.name[-2:] + '_loss.npy', loss_numpy)
+        #loss_numpy = np.load(opt.name[-2:] + '_loss.npy') #generator loss
+        #loss_numpy[int(opt.which_epoch)] /= 960
+        #np.save(opt.name[-2:] + '_loss.npy', loss_numpy)
 
         ### save model for this epoch
         if True: #epoch % opt.save_epoch_freq == 0: 
