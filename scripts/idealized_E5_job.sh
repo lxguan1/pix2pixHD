@@ -27,9 +27,9 @@
 # --continue_train starts from the latest epoch
 for i in {1..700}
 do
-#    python3 train.py --name idealized_E5 --label_nc 0 --continue_train --no_instance  --dataroot ./datasets/E5 --no_vgg_loss  --resize_or_crop crop --start_epoch  $i --gan_loss_numpy all_gan_loss_5.npy --disc_loss_numpy all_disc_loss_5.npy
-    python3 test.py --name idealized_E5 --resize_or_crop crop --no_instance --which_epoch $i --label_nc 0 --how_many 300 --dataroot ./datasets/E5 --numpy_file_rmse E5_test_rmse.npy --numpy_file E5_test.npy
-    python3 test.py --name idealized_E5 --resize_or_crop crop --no_instance --which_epoch $i --label_nc 0 --how_many 240 --dataroot ./datasets/E5 --phase val --numpy_file_rmse E5_val_rmse.npy --numpy_file E5_val.npy
+    python3 train.py --name idealized_E5 --label_nc 0 --continue_train --no_instance  --dataroot ./datasets/E5 --no_vgg_loss  --resize_or_crop crop --which_epoch  $i --gan_loss_numpy all_gan_loss_5.npy --disc_loss_numpy all_disc_loss_5.npy
+#    python3 test.py --name idealized_E5 --resize_or_crop crop --no_instance --which_epoch $i --label_nc 0 --how_many 300 --dataroot ./datasets/E5 --numpy_file_rmse E5_test_rmse.npy --numpy_file E5_test.npy
+#    python3 test.py --name idealized_E5 --resize_or_crop crop --no_instance --which_epoch $i --label_nc 0 --how_many 240 --dataroot ./datasets/E5 --phase val --numpy_file_rmse E5_val_rmse.npy --numpy_file E5_val.npy
 done
 #python3 test.py --name idealized_E5 --resize_or_crop crop --no_instance --which_epoch 700 --label_nc 0 --how_many 100 --dataroot ./datasets/E5 > out.txt
 
