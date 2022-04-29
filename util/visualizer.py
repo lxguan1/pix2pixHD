@@ -36,7 +36,7 @@ class Visualizer():
             log_file.write('================ Training Loss (%s) ================\n' % now)
 
     # |visuals|: dictionary of images to display or save
-    def display_current_results(self, visuals, epoch, step):
+    def display_current_results(self, visuals, epoch, step): #Need to modify tf_log in order to handle images with 2 channels
         if self.tf_log: # show images in tensorboard output
             img_summaries = []
             for label, image_numpy in visuals.items():
@@ -58,17 +58,23 @@ class Visualizer():
         if self.use_html: # save images to a html file
             for label, image_numpy in visuals.items():
                 if isinstance(image_numpy, list):
-                    for i in range(len(image_numpy)): #Plot the images
+                    for i in range(len(image_numpy)):
                         img_path = os.path.join(self.img_dir, 'epoch%.3d_%s_%d.jpg' % (epoch, label, i))
                         #util.save_image(image_numpy[i], img_path)
-                        im_map = plt.imshow(image_numpy[i], cmap=cc.cm.CET_D2, vmin = 45, vmax = 230)
+                        numpy_img = image_numpy[i]
+                        if len(numpy_img.shape) == 3 and numpy_img.shape[-1] > 1:
+                            numpy_img = numpy_img[:,:,0]
+                        im_map = plt.imshow(numpy_img, cmap=cc.cm.CET_D2, vmin = 45, vmax = 230)
                         plt.colorbar(im_map)
                         plt.savefig(img_path)
                         plt.gca().images[-1].colorbar.remove()
                 else:
                     img_path = os.path.join(self.img_dir, 'epoch%.3d_%s.jpg' % (epoch, label))
                     #util.save_image(image_numpy, img_path)
-                    im_map = plt.imshow(image_numpy, cmap=cc.cm.CET_D2, vmin = 45, vmax = 230)
+                    numpy_img = image_numpy
+                    if len(numpy_img.shape) == 3 and numpy_img.shape[-1] > 1:
+                        numpy_img = numpy_img[:,:,0]
+                    im_map = plt.imshow(numpy_img, cmap=cc.cm.CET_D2, vmin = 45, vmax = 230)
                     plt.colorbar(im_map)
                     plt.savefig(img_path)
                     plt.gca().images[-1].colorbar.remove()
@@ -81,7 +87,6 @@ class Visualizer():
                 txts = []
                 links = []
 
-                #Show the plotted images
                 for label, image_numpy in visuals.items():
                     if isinstance(image_numpy, list):
                         for i in range(len(image_numpy)):
@@ -135,7 +140,9 @@ class Visualizer():
             image_name = '%s_%s.jpg' % (name, label)
             save_path = os.path.join(image_dir, image_name)
             colormapping =  cc.cm.CET_D1A  #for middles and right image
-
+            #Vmin = 45
+            #Vmax = 230 #for left 3 images 
+            #image_numpy = image_numpy * np.load("normalize_constantA.npy") * 2 / 255 - 1 
 
             if label[0] == 'i': #for input image
                 colormapping = cc.cm.CET_D2 #for left image
@@ -145,7 +152,7 @@ class Visualizer():
                 Vmin = -55
                 Vmax = 130
 
-            im_map = plt.imshow(image_numpy, cmap=colormapping )
+            im_map = plt.imshow(image_numpy, cmap=colormapping )# , vmin = Vmin, vmax = Vmax) #util.save_image(image_numpy, save_path)
             #plt.colorbar(im_map)
             plt.colorbar(extend='max')
             plt.savefig(save_path)

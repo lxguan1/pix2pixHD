@@ -44,7 +44,11 @@ class AlignedDataset(BaseDataset):
         ### input A (label maps)
         A_path = self.A_paths[index]              
         A = np.load(A_path) #Image.open(A_path)
-        A = A[A.files[0]][:, :, np.newaxis] #To extract the array
+        A = A[A.files[0]]
+        if len(A.shape) == 2:
+            A = A[:, :, np.newaxis] #To extract the array
+        else:
+            A = A[A.files[0]][:, :]
         params = get_params(self.opt, (A.shape[1], A.shape[0]))
         if self.opt.label_nc == 0: #This branch will execute.
             transform_A = get_transform(self.opt, params)
@@ -58,7 +62,11 @@ class AlignedDataset(BaseDataset):
         if True: #Always have real images
             B_path = self.B_paths[index]   
             B = np.load(B_path) 
-            B = B[B.files[0]][:, :, np.newaxis] * 20 #To extract the array
+            B = B[B.files[0]]
+            if len(B.shape) == 2:
+                B = B[:, :, np.newaxis] * 20 #To extract the array
+            else:
+                B = B[:, :]
             transform_B = get_transform(self.opt, params, normalize=True, norm_val = self.norm_A)      
             B_tensor = transform_B(B)
 
