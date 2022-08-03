@@ -48,7 +48,7 @@ class AlignedDataset(BaseDataset):
         if len(A.shape) == 2:
             A = A[:, :, np.newaxis] #To extract the array
         else:
-            A = A[A.files[0]][:, :]
+            A = A[A.files[0]][:, :, :]
         params = get_params(self.opt, (A.shape[1], A.shape[0]))
         if self.opt.label_nc == 0: #This branch will execute.
             transform_A = get_transform(self.opt, params)
@@ -66,7 +66,7 @@ class AlignedDataset(BaseDataset):
             if len(B.shape) == 2:
                 B = B[:, :, np.newaxis] * 20 #To extract the array
             else:
-                B = B[:, :]
+                B = B[:, :, :]
             transform_B = get_transform(self.opt, params, normalize=True, norm_val = self.norm_A)      
             B_tensor = transform_B(B)
 
